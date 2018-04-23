@@ -16,7 +16,7 @@
 
 ###内存管理
 ####用两种方式造成循环引用
-
+####对ARC的理解
 
 ###多线程
 ####NSThread, NSOperation, GCD区别
@@ -24,20 +24,23 @@
 ####造一个死锁
 
 
-###BLOCK
-
+###Block
+####Block的底层原理
 
 ###网络
 
 
 ###runloop
 ####runloop内部实现逻辑
-
+####Autorelease (其实不完全属于runloop 知识点)
 
 ###runtime
 ####runtime应用场景
 ####runtime如何通过selector找到对应的IMP地址
 
+###系统流程
+####渲染过程
+####编译过程
 
 ###实际开发
 ####内存警告处理
