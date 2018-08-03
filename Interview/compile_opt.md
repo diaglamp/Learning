@@ -3,9 +3,11 @@
 ## 基础理论
 
 ### 构建 build
+
 IDE将编译和链接的过程一步完成，这个过程称为构建build
 
 ### 构建
+
 - 预编译 - 生成 `.i` 中间文件
     - 删除所有 `#define`，展开宏定义
     - 处理所有条件预编译指令，如 `#if` `#ifdef` `#elif` `#else` `#endif`
@@ -28,7 +30,8 @@ IDE将编译和链接的过程一步完成，这个过程称为构建build
     - 编译是针对单一文件，如果文件使用了外部的函数或者变量（统称符号Symbol）时，无法知道Symbol的地址，会置为零。
     - 链接时修正外部Symbol的地址，这个过程称为 重定位Relocation
 
-#### 静态链接
+### 静态链接
+
 - 空间与地址分配
     - 多个 .o 合并成一个 .out,代码段数据段合并。
 - 符号解析与重定位
@@ -50,13 +53,15 @@ IDE将编译和链接的过程一步完成，这个过程称为构建build
 - 静态库的链接
     - 静态库 `.a` 是一组目标文件的压缩集合
 
-#### 目标文件 .o
+### 目标文件
+
 - 目标文件中符号使用相对地址标记
 - 目标文件中有 重定位表
 
 ## iOS理论
 
 ### 构建流程
+
 - 编译信息写入辅助文件，创建编译后的文件架构（name.app）
 - 处理文件打包信息（entitlements）
 - 执行编译前脚本
@@ -102,6 +107,7 @@ IDE将编译和链接的过程一步完成，这个过程称为构建build
     - 解决了目标文件和库之间的链接。
 
 ### 编译器
+
 - Clang 编译器前端
     - 语法分析
     - 语义分析
@@ -116,12 +122,43 @@ IDE将编译和链接的过程一步完成，这个过程称为构建build
 
 
 ### Symbol
+
 - 每个函数、全局变量和类等都是通过符号的形式来定义和使用的
 - 编译后的符号都以地址来访问
 - 可执行文件和目标文件有一个符号表，这个符号表规定了它们的符号。
 - 例如 `printf` 用地址 `0x100000e80` 来表示
 
 
+## 实际优化
+
+### 概念
+
+- 增量编译
+- 全量编译
+
+### 编译时间监控
+
+1. 方案1
+    - `defaults write com.apple.dt.Xcode ShowBuildOperationDuration -bool YES`
+    - build clean 后能看到总时间
+
+2. 方案2
+    - `gem install xcpretty`  //安装xcpretty软件
+    - `npm install -g gnomon` //安装 gnomon
+    - `xcodebuild build | xcpretty | gnomon | sort -nr -k1` 后得到时间排序
+
+### 优化方法
+
+-  主要是针对方案2出来的数据做实际分析
+-  提高XCode编译时使用的线程数
+-  将Build Active Architecture Only改为Yes
+-  将大的框架抽取为Pods，并打成静态库 .a
+-  头文件中尽量使用 @class 而不是 #import
+
+-  将Debug Information Format改为DWARF，对增量编译影响非常大
+-  移除PCH，减少全量编译的概率
 
 ## 参考文章
-- [objc.io-编译器](https://www.objccn.io/issue-6-2/)
+
+- [编译器 - objc.io](https://www.objccn.io/issue-6-2/)
+- [如果将iOS打包速度提升十倍以上 - bestswifter](https://bestswifter.com/improve_compile_speed/)

@@ -2,49 +2,7 @@
 
 ## 理论
 
-### 术语 Terms
-
-### 虚拟地址空间 Virtual Address Space
-- 程序 - 静态 - 可执行文件 - 预先编译好的指令和数据集合的文件
-- 进程 - 动态 - 程序运行时的过程
-- 程序运行后，有自己独立的虚拟地址空间
-- 由CPU位数决定，32位CPU最多支持4G， 64位CPU最多支持 17179869184G （以下默认为32bit）
-- 一般来说，C语言指针大小的位数与虚拟空间的位数相同
-- 可访问空间由操作系统分配
-- 如果访问了未经允许的空间，操作系统会捕获访问，抛出异常（crash），错误原因为 Segmentation fault
-- 操作系统使用 0xC0000000 - 0xFFFFFFFF 1GB, 其他原则上分配给进程
-
-### 虚拟内存 Virtual Memory
-
-- Mach-O Terms
-    - File types
-        - Executable - Main binary for application
-        - Dylib - Dynamic library
-        - Bundle - Dylib that cannot be linked
-    - Image - An executable, dylib, or bundle
-    - Framework - Dylib with directory for resources and headers
-- Mach-O Image File
-    - File divided into segments
-        - __TEXT 
-            - header
-            - code
-            - read-only constants
-        - __DATA
-            - read-write content
-            - globals variables
-            - static variables
-        - __LINEDIT
-            - meta data about how to load the program
-            - 包含变量函数信息, func name and address
-    - All segment are multiples of page size
-        - 16KB on arm64
-        - 4KB elsewhere
-    - Sections are a subrange of a segment
-- Mach-O Universal Files
-    - Fat Header
-    - arm64
-    - armv7s
-- Virtual Memory
+- Virtual Memory 虚拟内存
     - 中间层
     - 逻辑地址 - 物理地址 的映射
     - 逻辑地址不映射物理RAM， 访问时会 page fault
@@ -79,36 +37,24 @@
         - Call mmap() for each segment
     - Rebase
         - `xcrun dyldinfo -rebase -bind -lazy_bind myapp`
-        - 
     - Bind
     - ObjC
     - Initializers
-- pre-main - main()之前的加载时间 定义为 t1
-- main - main()之后的加载时间 定义为 t2
-- 冷启动
-- 热启动
 
-- MachO file Structure
-    - Mach Header
-        - identify the file as a Mach-O file
-        - indicate the target architecture
-    - Load Commands
-        - specify the layout and linkage characteristics of the file
-        - The initial layout of the file in virtual memory
-        - The location of the symbol table (used for dynamic linking)
-        - The initial execution state of the main thread of the program
-        - The names of shared libraries that contain definitions for the main executable’s imported symbols
-    - Data
-        - Segments
-        - Each segment contains zero or more sections.
-        - Each section of a segment contains code or data of some particular type. 
-        - Each segment defines a region of virtual memory that the dynamic linker maps into the address space of the process. 
-        - The exact number and layout of segments and sections is specified by the load commands and the file type.
-    - Data last segment
-        - In user-level fully linked Mach-O files, the last segment is the link edit segment. 
-        - This segment contains the tables of link edit information, such as the symbol table, string table, and so forth, used by the dynamic loader to link an executable file or Mach-O bundle to its dependent libraries.
+### 虚拟地址空间 Virtual Address Space
+
+- 程序 - 静态 - 可执行文件 - 预先编译好的指令和数据集合的文件
+- 进程 - 动态 - 程序运行时的过程
+- 程序运行后，有自己独立的虚拟地址空间
+- 由CPU位数决定，32位CPU最多支持4G， 64位CPU最多支持 17179869184G （以下默认为32bit）
+- 一般来说，C语言指针大小的位数与虚拟空间的位数相同
+- 可访问空间由操作系统分配
+- 如果访问了未经允许的空间，操作系统会捕获访问，抛出异常（crash），错误原因为 Segmentation fault
+- 操作系统使用 0xC0000000 - 0xFFFFFFFF 1GB, 其他原则上分配给进程
+
 
 ### Building Mach-O Files
+
 - Products
     - Types of Mach-O files you can build
     - The main executable file usually contains the core logic of the program, including the entry point main function.
@@ -134,6 +80,7 @@
     - The static linker can link the object files stored in a static archive library into a Mach-O executable or dynamic library. 
 
 ### Executing Mach-O Files
+
 - Summary
     - Link share dynamic shared libraries.
     - define references to symbols in those modules
@@ -154,6 +101,7 @@
 
 
 ### Indirect Addressing
+
 - Summary
     - co-gen - code generation technique
     - allow symbols defined in one file to be referenced from another file.
@@ -169,40 +117,10 @@
     - Position-Independent Code
 
 ### Position-Independent Code
+
 - Summary
     - PIC, co-gen
     - allows the dynamic linker to load a region of code at a non-fixed virtual memory address.
-    - 
-
-
-```
-rebase infomation
-    - segment
-        - __DATA
-    - section
-        - __got
-        - __la_symbol_ptr
-        - __mod_init_func
-        - __const
-        - __cfstring
-        - __objc_classlist
-        - __objc_const
-        - __objc_selrefs
-        - __objc_classrefs
-        - __objc_superrefs
-        - __objc_data
-        - __data  
-    - address
-    - type
-
-bind infomation 
-    - segment 
-    - section
-    - address
-    - type
-    - addend dylib
-    - symbol
-```
 
 
 ## 技术方案
@@ -212,6 +130,7 @@ bind infomation
 - `t2 = main方法执行之后到AppDelegate类中的 didFinishLaunchingWithOptions:方法执行结束前这段时间，主要是构建第一个界面，并完成渲染展示。`
 
 ### 系统启动时序
+
 - 加载可执行文件 MachO
 - 加载动态链接库 dyld
     - load dylibs image 读取库镜像文件
@@ -235,6 +154,7 @@ bind infomation
         - 非基本类型 C++ 静态全局变量创建
 
 ### 启动调用堆栈
+
 - dyld 初始化程序二进制文件
 - ImageLoader 递归读取 image，包括自定义的类、方法等各种符号
 - runtime 绑定 dyld 回调，image 加载到内存后，dyld 会通知 runtime 处理
@@ -242,7 +162,14 @@ bind infomation
 
 整个事件由 dyld 主导，完成运行环境的初始化后，配合 ImageLoader 将二进制文件按格式加载到内存， 动态链接依赖库，并由 runtime 负责加载成 objc 定义的结构，所有初始化工作结束后，dyld 调用真正的 main 函数。
 
+
+### 时间统计
+
+- premain
+- main
+
 ### 可优化点
+
 - 减少不必要的 framework，动态链接比较耗时
 - 合并或者删减一些 OC 类，清理项目中无用的类
 - 删减无用静态变量

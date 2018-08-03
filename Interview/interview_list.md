@@ -3,63 +3,99 @@
 ## OBJC
 
 ### 基础
+
 #### unsafe_unretained, weak, assign区别
+
 #### 64bit下NSNumber的优化
+
 #### Tagged Pointer
 
 
 
 ### 调试
+
 #### 怎么分析Crash日志
+
 #### 一般怎样调试野指针
 
 
 ### 内存管理
+
 #### 用两种方式造成循环引用
+
 #### 对ARC的理解
 
 ### 多线程
+
 #### NSThread, NSOperation, GCD区别
+
 #### GCD执行原理
+
 #### 造一个死锁
 
 
 ### Block
+
 #### Block的底层原理
 
 ### 网络
 
-
 ### runloop
-#### unloop内部实现逻辑
+
+#### runloop内部实现逻辑
+
 #### Autorelease (其实不完全属于runloop 知识点)
 
 ### runtime
+
 #### 内存布局
+
 #### 如何设计KVO
+
 #### runtime应用场景
+
 #### runtime如何通过selector找到对应的IMP地址
 
 ### 系统流程
-#### 启动流程
-#### 渲染过程
+
 #### 编译过程
 
+#### 启动流程
+
+#### 渲染过程
+
+
 ### 实际开发
+
 #### 内存警告处理
+
 #### 后台挂起处理事务
 
 
 
 ## 性能优化
 
-### 启动优化
+### 性能监控
+
+[性能监控](performance_monitor.md)
 
 ### 编译优化
 
+[编译优化](compile_opt.md)
+
 ### 包大小优化
 
+[包大小优化](ipa_opt.md)
+
+### 启动优化
+
+[启动优化](launch_opt.md)
+
 ### 卡顿优化
+
+
+
+### 耗电优化
 
 ### 卡顿率优化
 

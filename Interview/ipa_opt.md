@@ -15,6 +15,56 @@ Adhoc 包，AppStore包，iTunes包 除了Payload外其他信息有差别
 
 
 ### Mach-O 结构
+
+- Mach-O Terms 
+    - File types
+        - Executable - Main binary for application
+        - Dylib - Dynamic library
+        - Bundle - Dylib that cannot be linked
+    - Image - An executable, dylib, or bundle
+    - Framework - Dylib with directory for resources and headers
+- Mach-O Image File
+    - File divided into segments
+        - __TEXT 
+            - header
+            - code
+            - read-only constants
+        - __DATA
+            - read-write content
+            - globals variables
+            - static variables
+        - __LINEDIT
+            - meta data about how to load the program
+            - 包含变量函数信息, func name and address
+    - All segment are multiples of page size
+        - 16KB on arm64
+        - 4KB elsewhere
+    - Sections are a subrange of a segment
+- Mach-O Universal Files
+    - Fat Header
+    - arm64
+    - armv7s
+
+- MachO file Structure
+    - Mach Header
+        - identify the file as a Mach-O file
+        - indicate the target architecture
+    - Load Commands
+        - specify the layout and linkage characteristics of the file
+        - The initial layout of the file in virtual memory
+        - The location of the symbol table (used for dynamic linking)
+        - The initial execution state of the main thread of the program
+        - The names of shared libraries that contain definitions for the main executable’s imported symbols
+    - Data
+        - Segments
+        - Each segment contains zero or more sections.
+        - Each section of a segment contains code or data of some particular type. 
+        - Each segment defines a region of virtual memory that the dynamic linker maps into the address space of the process. 
+        - The exact number and layout of segments and sections is specified by the load commands and the file type.
+    - Data last segment
+        - In user-level fully linked Mach-O files, the last segment is the link edit segment. 
+        - This segment contains the tables of link edit information, such as the symbol table, string table, and so forth, used by the dynamic loader to link an executable file or Mach-O bundle to its dependent libraries.
+
 - Fat Header 多种架构的头，包含架构信息
 - Mach Header 可执行文件头，包含架构信息，文件类型，LC的数量和大小
 - Load Commands 
@@ -80,6 +130,7 @@ Adhoc 包，AppStore包，iTunes包 除了Payload外其他信息有差别
 ## 分析
 
 ### LinkMap 文件结构
+
 - Object files
     - .o文件 -- .m编译后的产物
     - 文件路径
@@ -115,9 +166,6 @@ Object files 中有标记各个文件的编号，通过文件编号可以再 Sym
         - 使用Asset可以减少在指定设备的ipa中只使用@2x or @3x图片，而不需要都带上
     - 动态资源下载
         - 使用率较少的资源
-- 编译优化
-    - 开启编译优化
-    - 避免编译多个架构
 - 可执行文件优化
     - 去除无用代码
         - 没有被使用的类
@@ -130,6 +178,7 @@ Object files 中有标记各个文件的编号，通过文件编号可以再 Sym
 	
 
 ### 关于图片格式的选择
+
 - PNG无损、加载和显示会更快
 - JPG有损，但大图时会小很多，显示时需要额外的复杂的解码算法
 - 对于照片和大图选择JPG；小图、要求无损、有透明通道使用PNG
