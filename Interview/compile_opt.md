@@ -2,31 +2,35 @@
 
 ## 基础理论
 
-### 构建 build
-
 IDE将编译和链接的过程一步完成，这个过程称为构建build
 
-### 构建
-
-- 预编译 - 生成 `.i` 中间文件
+1. 预编译 (Prepressing) - 生成 `.i` 中间文件
+   
     - 删除所有 `#define`，展开宏定义
     - 处理所有条件预编译指令，如 `#if` `#ifdef` `#elif` `#else` `#endif`
     - 处理 `#include` 预编译指令，将被包含文件递归插入改指令的位置
     - 删除所有注释
     - 添加行号和文件名标识
     - 保留所有 `#pragma` 指令
-- 编译 - 生成 `.s` 汇编文件
+  
+2. 编译 (Compilation) - 生成 `.s` 汇编文件
+   
     - 词法分析 - 扫描器生成记号 `Scanner -> Token`
     - 语法分析 - 语法分析器生成语法树 `Grammer Parser -> Syntax Tree`
     - 语义分析 - 语义分析器为表达式标记类型 `Semantic Analyzer -> Type`
     - 中间语言生成 - 源码优化器生成中间代码 `Source Code Optimizer -> Intermediate Representation`
-    - 以上为编译器前端，以下为编译器后端 ======
+    - ====== 以上为编译器前端，以下为编译器后端 ======
     - 代码生成器 - 生成汇编代码 `Code Generator -> Assembler`
     - 汇编 - 汇编器生成目标代码 `Assembler -> Object`
     - 目标代码优化 - 目标代码优化器：选择合适的寻址方式、使用位移替代乘法运算、删除多余指令等
-- 汇编 - 生成 `.o` 目标文件
-    - 一般在说编译器的工作的时候会包含汇编的步骤，所以汇编具体的工作在上面的编译项
-- 链接 - 生成 `.out` 可执行文件
+  
+3. 汇编 (Assembly) - 生成 `.o` 目标文件
+   
+    - 汇编器将汇编代码转变成机器能够执行的指令。
+    - 一般在说编译器的工作的时候会包含汇编的步骤，所以汇编的工作在编译中也包含了
+    
+4. 链接 (Linking) - 生成 `.out` 可执行文件
+  
     - 编译是针对单一文件，如果文件使用了外部的函数或者变量（统称符号Symbol）时，无法知道Symbol的地址，会置为零。
     - 链接时修正外部Symbol的地址，这个过程称为 重定位Relocation
 
@@ -60,7 +64,7 @@ IDE将编译和链接的过程一步完成，这个过程称为构建build
 
 ## iOS理论
 
-### 构建流程
+### iOS 构建流程
 
 - 编译信息写入辅助文件，创建编译后的文件架构（name.app）
 - 处理文件打包信息（entitlements）
@@ -106,7 +110,7 @@ IDE将编译和链接的过程一步完成，这个过程称为构建build
     - 将多个目标对象文件合并为一个可执行文件 (或者一个动态库)
     - 解决了目标文件和库之间的链接。
 
-### 编译器
+### 编译器职能
 
 - Clang 编译器前端
     - 语法分析
@@ -121,7 +125,7 @@ IDE将编译和链接的过程一步完成，这个过程称为构建build
     - 针对不同架构生成不同机器码
 
 
-### Symbol
+### Symbol 符号表
 
 - 每个函数、全局变量和类等都是通过符号的形式来定义和使用的
 - 编译后的符号都以地址来访问
@@ -147,18 +151,30 @@ IDE将编译和链接的过程一步完成，这个过程称为构建build
     - `npm install -g gnomon` //安装 gnomon
     - `xcodebuild build | xcpretty | gnomon | sort -nr -k1` 后得到时间排序
 
+3. 方案3
+    - Xcode10 后能直接看到每个文件的编译时间，但信息太乱
+    - 命令行可以选项开启
+
 ### 优化方法
 
--  主要是针对方案2出来的数据做实际分析
--  提高XCode编译时使用的线程数
--  将Build Active Architecture Only改为Yes
--  将大的框架抽取为Pods，并打成静态库 .a
--  头文件中尽量使用 @class 而不是 #import
+- 编译器选项优化
+  
+    - Debug模式下，不生成dsym文件
+    - 将Build Active Architecture Only改为Yes
+    - Debug模式下，关闭编译器优化
+    - 开启Xcode10 的 `parallel builds `
 
--  将Debug Information Format改为DWARF，对增量编译影响非常大
--  移除PCH，减少全量编译的概率
+- 代码层面优化
+  
+    - forward declaration, 头文件中尽量使用 @class 而不是 #import
+    - 移除无效 import
+    - 将大的框架抽取为Pods，并打成静态库 .a
+    - 经常修改的文件在PCH中移除，减少全量编译的概率
 
 ## 参考文章
 
 - [编译器 - objc.io](https://www.objccn.io/issue-6-2/)
 - [如果将iOS打包速度提升十倍以上 - bestswifter](https://bestswifter.com/improve_compile_speed/)
+- [iOS编译过程的原理和应用](https://github.com/LeoMobileDeveloper/Blogs/blob/master/iOS/iOS%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B%E7%9A%84%E5%8E%9F%E7%90%86%E5%92%8C%E5%BA%94%E7%94%A8.md)
+
+[Building Faster in Xcode - WWDC2018](https://developer.apple.com/videos/play/wwdc2018/408/)
