@@ -2,51 +2,64 @@
 
 ## 理论
 
-- Virtual Memory 虚拟内存
-    - 中间层
-    - 逻辑地址 - 物理地址 的映射
-    - 逻辑地址不映射物理RAM， 访问时会 page fault
-    - 多个逻辑地址映射到同一个物理RAM ， 多进程共享内存
-    - clean / dirty page
-    - mmap（）
-    - Copy-On-Write, COW
-- Mach-O Image Loading
-    - __Text and __LINKEDIT 内存共享
-    - __DATA dirty page, COW
-    - __LINKEDIT 用完回收
-- 安全
-    - ASLR (Address Space Layout Randomization)：地址空间布局随机化，镜像会在随机的地址上加载。
-    - 代码签名：把每页内容都生成一个单独的加密散列值，并存储在 `__LINKEDIT` 中
-- exec() to main()
-    - exec() 系统调用.
-    - Kernel maps your app info new address space
-    - Start of your app is random
-    - Low memory is marked inaccessible
-- Dylibs
-    - Dyld : helper program - load dylibs 
-    - Dyld runs in progress
-    - 内核完成映射进程的工作后将 dyld 的 Mach-O 映射到进程中的随机地址，并将PC寄存器设为 dyld 的地址并运行。
-- Dyld Steps
-    - Loading Dylibs
-        - 读取主可执行文件的头文件，内核已经映射好
-        - Parse list of dependent dylibs
-        - Find requested mach-o file
-        - Open and read start of file
-        - valid mach-o
-        - Register code signature
-        - Call mmap() for each segment
-    - Rebase
-        - `xcrun dyldinfo -rebase -bind -lazy_bind myapp`
-    - Bind
-    - ObjC
-    - Initializers
+Virtual Memory 虚拟内存
+
+- 中间层
+- 逻辑地址 - 物理地址 的映射
+- 逻辑地址不映射物理RAM， 访问时会 page fault
+- 多个逻辑地址映射到同一个物理RAM ， 多进程共享内存
+- clean / dirty page
+- mmap（）
+- Copy-On-Write, COW
+  
+Mach-O Image Loading
+
+- __Text and __LINKEDIT 内存共享
+- __DATA dirty page, COW
+- __LINKEDIT 用完回收
+  
+安全
+
+- ASLR (Address Space Layout Randomization)：地址空间布局随机化，镜像会在随机的地址上加载。
+- 代码签名：把每页内容都生成一个单独的加密散列值，并存储在 `__LINKEDIT` 中
+  
+ exec() to main()
+
+- exec() 系统调用.
+- Kernel maps your app info new address space
+- Start of your app is random
+- Low memory is marked inaccessible
+  
+Dylibs
+
+- Dyld : helper program to load dylibs 
+- Dyld runs in progress
+- 内核完成映射进程的工作后将 dyld 的 Mach-O 映射到进程中的随机地址，并将PC寄存器设为 dyld 的地址并运行。
+  
+ Dyld Steps
+
+- Load Dylibs image
+- Rebase Image
+- Bind Image
+- ObjC setup
+- Initializers
+
+加载一个动态库的过程
+
+- 读取主可执行文件的头文件，内核已经映射好
+- Parse list of dependent dylibs
+- Find requested mach-o file
+- Open and read start of file
+- valid mach-o
+- Register code signature
+- Call mmap() for each segment
 
 ### 虚拟地址空间 Virtual Address Space
 
 - 程序 - 静态 - 可执行文件 - 预先编译好的指令和数据集合的文件
 - 进程 - 动态 - 程序运行时的过程
 - 程序运行后，有自己独立的虚拟地址空间
-- 由CPU位数决定，32位CPU最多支持4G， 64位CPU最多支持 17179869184G （以下默认为32bit）
+- 由CPU位数决定，32位CPU最多支持4G， 64位CPU最多支持 17179869184G
 - 一般来说，C语言指针大小的位数与虚拟空间的位数相同
 - 可访问空间由操作系统分配
 - 如果访问了未经允许的空间，操作系统会捕获访问，抛出异常（crash），错误原因为 Segmentation fault
@@ -133,25 +146,26 @@
 
 - 加载可执行文件 MachO
 - 加载动态链接库 dyld
-    - load dylibs image 读取库镜像文件
-        - 分析依赖的动态库
-        - 找到动态库的 mach-o 文件
-        - 打开文件
-        - 验证文件
-        - 在系统核心注册文件签名
-        - 对动态库的每一个 segment 调用 mmap() 
-    - Rebase image
-        - 修复指向当前镜像内部的资源指针
-    - Bind image
-        - 修复指向的镜像外部的资源指针
-    - Objc setup
-        - 注册Objc类
-        - 注册category，插入分类中的方法
-        - 保证 selector 唯一
-    - initializers
-        - `+ load ()` 方法
-        - C ++ 构造函数
-        - 非基本类型 C++ 静态全局变量创建
+  
+- load dylibs image 读取库镜像文件
+    - 分析依赖的动态库
+    - 找到动态库的 mach-o 文件
+    - 打开文件
+    - 验证文件
+    - 在系统核心注册文件签名
+    - 对动态库的每一个 segment 调用 mmap() 
+- Rebase image
+    - 修复指向当前镜像内部的资源指针
+- Bind image
+    - 修复指向的镜像外部的资源指针
+- Objc setup
+    - 注册Objc类
+    - 注册category，插入分类中的方法
+    - 保证 selector 唯一
+- initializers
+    - `+ load ()` 方法
+    - C ++ 构造函数
+    - 非基本类型 C++ 静态全局变量创建
 
 ### 启动调用堆栈
 
@@ -176,3 +190,5 @@
 - 删减没有被调用或者废弃的方法
 - 将不必须在+load方法中做的事情延迟到+initialize中
 - 尽量不要用C++虚函数
+
+- 重点其实都在业务逻辑
